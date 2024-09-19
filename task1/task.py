@@ -16,6 +16,14 @@ def parse_tree(raw_data):
     return response
 
 
+def get_all_objects(adj):
+    objects = set()
+    for a in adj:
+        objects.add(a[0])
+        objects.add(a[1])
+    return sorted(objects)
+
+
 def get_all_parents(adj, obj):
     parents = []
     current_object = obj
@@ -39,10 +47,15 @@ def get_all_siblings(adj, obj):
     return siblings
 
 
-if __name__ == "__main__":
-    json_data = '{"1": {"2": {"3": {"4": null,"5": null},"6": {"7": null,"8": null}}}}'
+def task(json_data):
     adjacency = parse_tree(json_data)
-    pars = get_all_parents(adjacency, "8")
-    print(pars)
-    sibs = get_all_siblings(adjacency, "8")
-    print(sibs)
+    objects_set = get_all_objects(adjacency)
+    answer = []
+    for obj in objects_set:
+        answer.append([get_all_parents(adjacency, obj), get_all_siblings(adjacency, obj)])
+    return answer
+
+
+if __name__ == "__main__":
+    ans = task('{"1": {"2": {"3": {"4": null,"5": null},"6": {"7": null,"8": null}}}}')
+    print(ans)
