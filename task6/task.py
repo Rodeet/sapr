@@ -15,12 +15,34 @@ def phasification(temps, x):
     return phases
 
 
-def activation_levels():
-    pass
+def activation_levels(heating_levels, rules, phases):
+    dephases = []
+    for level in heating_levels["температура"]:
+        new_points = []
+        phase_id = ""
+        for rule in rules:
+            if rule[1] == level["id"]:
+                phase_id = rule[0]
+                break
+        for i in range(1, len(level["points"]), 2):
+            value = (phases[phase_id] - level["points"][i - 1][1]) * (
+                        level["points"][i][0] - level["points"][i - 1][0]) / (
+                                level["points"][i][1] - level["points"][i - 1][1]) + level["points"][i - 1][0]
+            if level["points"][i - 1][0] <= value < level["points"][i][0]:
+                new_points.append([value, phases[phase_id]])
+        dephases.append(new_points)
+    return dephases
 
 
-def dephasification():
-    pass
+def dephasification(dephases):
+    max_value = 0
+    value = 0
+    for dephase in dephases:
+        for point in dephase:
+            if point[1] > max_value:
+                max_value = point[1]
+                value = point[0]
+    return value
 
 
 def main(temperature, heating_level, rule, x):
@@ -28,8 +50,9 @@ def main(temperature, heating_level, rule, x):
     heating_level = json.loads(heating_level)
     rule = json.loads(rule)
     phases = phasification(temperature, x)
-    print(phases)
-    pass
+    dephases = activation_levels(heating_level, rule, phases)
+    value = dephasification(dephases)
+    return value
 
 
 if __name__ == "__main__":
@@ -100,10 +123,11 @@ if __name__ == "__main__":
     }
     '''
     json_data_3 = '''[
-        ["холодно", "интенсивно"],
-        ["нормально", "умеренно"],
-        ["жарко", "слабо"]] 
+        ["холодно", "интенсивный"],
+        ["комфортно", "умеренный"],
+        ["жарко", "слабый"]] 
     '''
 
     el = 19
-    main(json_data_1, json_data_2, json_data_3, el)
+    level = main(json_data_1, json_data_2, json_data_3, el)
+    print(level)
